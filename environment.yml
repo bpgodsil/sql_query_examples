@@ -1,0 +1,9 @@
+name: py_sql
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - sqlalchemy
+  - pandas
+  - jupyterlab
+prefix: C:\Users\godsi\miniconda3\envs\py_sql

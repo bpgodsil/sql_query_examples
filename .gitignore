@@ -1,0 +1,38 @@
+
+---
+
+# 2) .gitignore (paste into `.gitignore`)
+```gitignore
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Ignore notebook outputs and large files if you prefer (see notes)
+# Uncomment if you don't want outputs tracked:
+# *.ipynb
+
+# Python / virtualenv
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Conda env export / temp
+.environment
+*.env
+environment.yml.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Windows/Powershell
+*.lnk
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+
+# Jupyter Lab workspaces
+.jupyterlab/
