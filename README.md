@@ -2,6 +2,8 @@
 
 A small, personal collection of Jupyter notebooks to practice and demonstrate SQL query skills using the **Chinook** sample database (SQLite).
 
+⚠️ This project is a work in progress. The notebooks demonstrate foundational SQL skills, and I will continue to expand them to showcase more advanced queries and analyses.
+
 ## What’s in this repo
 - `data/Chinook_Sqlite.sqlite` — Chinook SQLite database (sample data)
 - `notebooks/01_basic_select.ipynb` — basic SELECT, filtering, sorting
@@ -21,3 +23,8 @@ This repository is a demonstration of practical SQL skills:
    ```bash
    git clone <your-repo-url>
    cd chinook_sql_query_examples
+
+## View Notebooks (HTML)
+
+- [Basic SQL Queries](https://bpgodsil.github.io/sql_query_examples/01_basic_select.html)
+- [Joins and Aggregations](https://bpgodsil.github.io/sql_query_examples/02_joins_and_aggregations.html)
