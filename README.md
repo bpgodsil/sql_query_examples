@@ -28,3 +28,4 @@ This repository is a demonstration of practical SQL skills:
 
 - [Basic SQL Queries](https://bpgodsil.github.io/sql_query_examples/01_basic_select.html)
 - [Joins and Aggregations](https://bpgodsil.github.io/sql_query_examples/02_joins_and_aggregations.html)
+- [CTEs and subqueries (in progress)](https://bpgodsil.github.io/sql_query_examples/03_ctes_and_subqueries.html)
