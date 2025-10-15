@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>02_joins_and_aggregations</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>03_ctes_and_subqueries</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7511,28 +7511,28 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d868adf2-1e7c-4bad-a774-3e96d32d0f69">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=bc18f389-5a2b-4fd9-84b3-6562be39939d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="SQL-Examples:-Joins-and-Aggregation-Queries">SQL Examples: Joins and Aggregation Queries<a class="anchor-link" href="#SQL-Examples:-Joins-and-Aggregation-Queries">¶</a></h1><p>This notebook continues my SQL practice with the <strong>Chinook</strong> database, focusing on combining data from multiple tables and summarizing.</p>
+<h1 id="SQL-Examples:-Common-Table-Expressions-(CTEs)-and-Subqueries">SQL Examples: Common Table Expressions (CTEs) and Subqueries<a class="anchor-link" href="#SQL-Examples:-Common-Table-Expressions-(CTEs)-and-Subqueries">¶</a></h1><p>This notebook continues my SQL practice with the Chinook database, focusing on building layered and reusable queries through CTEs and subqueries.</p>
+<p>This notebook is a work-in-progress.  1 of the 7 queries are provided.</p>
 <p>These exercises demonstrate practical use of:</p>
 <ul>
-<li><strong>INNER JOINs</strong> to link customer, invoice, and employee data</li>
-<li><strong>GROUP BY</strong> and <strong>aggregate functions</strong> (<code>COUNT</code>, <code>SUM</code>) to compute key metrics such as total revenue or track counts</li>
-<li><strong>Filtering and sorting</strong> results to identify top-performing customers and artists</li>
-<li><strong>Common Table Expressions (CTEs)</strong> to structure multi-step queries and simplify analysis</li>
-<li><strong>Window Functions</strong> (RANK) to compute ranks</li>
-<li><strong>Practical data analysis patterns</strong>, such as ranking results, aggregating by category, and summarizing business performance by country or genre</li>
+<li>CTEs to structure multi-step analyses and improve query readability</li>
+<li>Subqueries embedded in SELECT, FROM, and WHERE clauses to filter, rank, or compute values dynamically</li>
+<li>Ranking and filtering results (e.g., top customers, most popular tracks) using aggregated metrics</li>
+<li>Nested aggregation to compare individual results to group or global averages</li>
+<li>Combining CTEs and joins</li>
 </ul>
-<p>Together, these examples illustrate how SQL aggregation and joins can answer realistic business questions about sales, customers, and music catalogs.</p>
+<p>Together, these examples highlight how CTEs and subqueries can simplify complex analyses and be adapted for use with new questions.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dc3c6833-5f75-4277-b7f4-13d9c4b5f34b">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=99bc0e3b-ea01-40dd-b940-f5c894cc4002">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7558,7 +7558,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -7615,13 +7615,13 @@ a.anchor-link {
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=fafad8ab-4e0a-4df2-a4a7-827be1cd118d">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=570c77d8-65e3-48a4-84ca-18c154dc537d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="1)-List-all-invoices-with-the-customer-name-and-total-invoice-amount.">1) List all invoices with the customer name and total invoice amount.<a class="anchor-link" href="#1)-List-all-invoices-with-the-customer-name-and-total-invoice-amount.">¶</a></h3>
+<h3 id="1)-Create-a-CTE-for-top-10-customers-by-revenue-and-join-it-to-get-their-invoices.">1) Create a CTE for top 10 customers by revenue and join it to get their invoices.<a class="anchor-link" href="#1)-Create-a-CTE-for-top-10-customers-by-revenue-and-join-it-to-get-their-invoices.">¶</a></h3>
 </div>
 </div>
 </div>
@@ -7630,17 +7630,32 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
 
-<span class="s2">SELECT CONCAT(c.FirstName, ' ', c.LastName) as customer_name,</span>
-<span class="s2">       i.InvoiceId,</span>
-<span class="s2">       i.Total AS invoice_amount</span>
-<span class="s2">FROM customer AS c</span>
-<span class="s2">JOIN invoice AS i ON c.CustomerId = i.CustomerId</span>
-<span class="s2">ORDER BY customer_name ;</span>
+<span class="s2">WITH top_10_customers AS (</span>
+<span class="s2">  SELECT </span>
+<span class="s2">      c.CustomerId,</span>
+<span class="s2">      CONCAT(c.FirstName, ' ', c.LastName) AS customer_name,</span>
+<span class="s2">      SUM(i.Total) AS total_invoice_revenue</span>
+<span class="s2">  FROM customer AS c</span>
+<span class="s2">  JOIN invoice AS i </span>
+<span class="s2">      ON c.CustomerId = i.CustomerId</span>
+<span class="s2">  GROUP BY c.CustomerId</span>
+<span class="s2">  ORDER BY total_invoice_revenue DESC</span>
+<span class="s2">  LIMIT 10</span>
+<span class="s2">)</span>
+<span class="s2">SELECT </span>
+<span class="s2">    ttc.customer_name,</span>
+<span class="s2">    i.InvoiceId,</span>
+<span class="s2">    i.InvoiceDate,</span>
+<span class="s2">    i.Total</span>
+<span class="s2">FROM invoice AS i</span>
+<span class="s2">JOIN top_10_customers AS ttc </span>
+<span class="s2">    ON i.CustomerId = ttc.CustomerId</span>
+<span class="s2">ORDER BY ttc.customer_name, i.InvoiceDate ;</span>
 
 <span class="s2">"""</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
@@ -7655,7 +7670,7 @@ a.anchor-link {
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7677,38 +7692,44 @@ a.anchor-link {
 <th></th>
 <th>customer_name</th>
 <th>InvoiceId</th>
-<th>invoice_amount</th>
+<th>InvoiceDate</th>
+<th>Total</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <th>0</th>
-<td>Aaron Mitchell</td>
-<td>50</td>
+<td>Astrid Gruber</td>
+<td>78</td>
+<td>2021-12-08 00:00:00</td>
 <td>1.98</td>
 </tr>
 <tr>
 <th>1</th>
-<td>Aaron Mitchell</td>
-<td>61</td>
-<td>13.86</td>
+<td>Astrid Gruber</td>
+<td>89</td>
+<td>2022-01-18 00:00:00</td>
+<td>18.86</td>
 </tr>
 <tr>
 <th>2</th>
-<td>Aaron Mitchell</td>
-<td>116</td>
+<td>Astrid Gruber</td>
+<td>144</td>
+<td>2022-09-18 00:00:00</td>
 <td>8.91</td>
 </tr>
 <tr>
 <th>3</th>
-<td>Aaron Mitchell</td>
-<td>245</td>
+<td>Astrid Gruber</td>
+<td>273</td>
+<td>2024-04-24 00:00:00</td>
 <td>1.98</td>
 </tr>
 <tr>
 <th>4</th>
-<td>Aaron Mitchell</td>
-<td>268</td>
+<td>Astrid Gruber</td>
+<td>296</td>
+<td>2024-07-27 00:00:00</td>
 <td>3.96</td>
 </tr>
 <tr>
@@ -7716,1549 +7737,128 @@ a.anchor-link {
 <td>...</td>
 <td>...</td>
 <td>...</td>
+<td>...</td>
 </tr>
 <tr>
-<th>407</th>
-<td>Wyatt Girard</td>
-<td>83</td>
-<td>0.99</td>
+<th>65</th>
+<td>Victor Stevens</td>
+<td>190</td>
+<td>2023-04-18 00:00:00</td>
+<td>1.98</td>
 </tr>
 <tr>
-<th>408</th>
-<td>Wyatt Girard</td>
-<td>204</td>
-<td>3.98</td>
+<th>66</th>
+<td>Victor Stevens</td>
+<td>201</td>
+<td>2023-05-29 00:00:00</td>
+<td>18.86</td>
 </tr>
 <tr>
-<th>409</th>
-<td>Wyatt Girard</td>
-<td>215</td>
-<td>13.86</td>
-</tr>
-<tr>
-<th>410</th>
-<td>Wyatt Girard</td>
-<td>270</td>
+<th>67</th>
+<td>Victor Stevens</td>
+<td>256</td>
+<td>2024-01-27 00:00:00</td>
 <td>8.91</td>
 </tr>
 <tr>
-<th>411</th>
-<td>Wyatt Girard</td>
-<td>399</td>
+<th>68</th>
+<td>Victor Stevens</td>
+<td>385</td>
+<td>2025-09-02 00:00:00</td>
 <td>1.98</td>
 </tr>
+<tr>
+<th>69</th>
+<td>Victor Stevens</td>
+<td>408</td>
+<td>2025-12-05 00:00:00</td>
+<td>3.96</td>
+</tr>
 </tbody>
 </table>
-<p>412 rows × 3 columns</p>
+<p>70 rows × 4 columns</p>
 </div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b50ccce9-4c99-45db-8c9d-5e7dec468ded">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e02dcce4-0ccc-4d44-8f5b-4cb5d8045a09">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="2)-Show-total-revenue-per-country.">2) Show total revenue per country.<a class="anchor-link" href="#2)-Show-total-revenue-per-country.">¶</a></h3>
+<h3 id="2)-Use-a-subquery-to-find-the-genre-with-the-highest-average-track-price.">2) Use a subquery to find the genre with the highest average track price.<a class="anchor-link" href="#2)-Use-a-subquery-to-find-the-genre-with-the-highest-average-track-price.">¶</a></h3>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6c68a8af-2dfd-4423-92fa-7f6a6f9e6252">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=aad1f6f9-d5f7-46bc-a51e-2ec396de1c56">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
-
-<span class="s2">SELECT c.Country, -- using customer country</span>
-<span class="s2">       SUM(i.Total) AS total_revenue</span>
-<span class="s2">FROM customer AS c</span>
-<span class="s2">JOIN invoice AS i ON c.CustomerId = i.CustomerId</span>
-<span class="s2">GROUP BY c.Country</span>
-<span class="s2">ORDER BY total_revenue DESC ;</span>
-
-<span class="s2">"""</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-<span class="n">df</span>
+<div class="highlight hl-ipython3"><pre><span></span> 
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>Country</th>
-<th>total_revenue</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>USA</td>
-<td>523.06</td>
-</tr>
-<tr>
-<th>1</th>
-<td>Canada</td>
-<td>303.96</td>
-</tr>
-<tr>
-<th>2</th>
-<td>France</td>
-<td>195.10</td>
-</tr>
-<tr>
-<th>3</th>
-<td>Brazil</td>
-<td>190.10</td>
-</tr>
-<tr>
-<th>4</th>
-<td>Germany</td>
-<td>156.48</td>
-</tr>
-<tr>
-<th>5</th>
-<td>United Kingdom</td>
-<td>112.86</td>
-</tr>
-<tr>
-<th>6</th>
-<td>Czech Republic</td>
-<td>90.24</td>
-</tr>
-<tr>
-<th>7</th>
-<td>Portugal</td>
-<td>77.24</td>
-</tr>
-<tr>
-<th>8</th>
-<td>India</td>
-<td>75.26</td>
-</tr>
-<tr>
-<th>9</th>
-<td>Chile</td>
-<td>46.62</td>
-</tr>
-<tr>
-<th>10</th>
-<td>Ireland</td>
-<td>45.62</td>
-</tr>
-<tr>
-<th>11</th>
-<td>Hungary</td>
-<td>45.62</td>
-</tr>
-<tr>
-<th>12</th>
-<td>Austria</td>
-<td>42.62</td>
-</tr>
-<tr>
-<th>13</th>
-<td>Finland</td>
-<td>41.62</td>
-</tr>
-<tr>
-<th>14</th>
-<td>Netherlands</td>
-<td>40.62</td>
-</tr>
-<tr>
-<th>15</th>
-<td>Norway</td>
-<td>39.62</td>
-</tr>
-<tr>
-<th>16</th>
-<td>Sweden</td>
-<td>38.62</td>
-</tr>
-<tr>
-<th>17</th>
-<td>Spain</td>
-<td>37.62</td>
-</tr>
-<tr>
-<th>18</th>
-<td>Poland</td>
-<td>37.62</td>
-</tr>
-<tr>
-<th>19</th>
-<td>Italy</td>
-<td>37.62</td>
-</tr>
-<tr>
-<th>20</th>
-<td>Denmark</td>
-<td>37.62</td>
-</tr>
-<tr>
-<th>21</th>
-<td>Belgium</td>
-<td>37.62</td>
-</tr>
-<tr>
-<th>22</th>
-<td>Australia</td>
-<td>37.62</td>
-</tr>
-<tr>
-<th>23</th>
-<td>Argentina</td>
-<td>37.62</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c2057aba-f5bf-410b-bfa8-e6896e91f961">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5d1441f4-0961-4d97-988f-f4cabb6eb759">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="3)-Count-the-number-of-tracks-each-artist-has.">3) Count the number of tracks each artist has.<a class="anchor-link" href="#3)-Count-the-number-of-tracks-each-artist-has.">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bdee3a2f-468e-436f-ad25-a4026e29a669">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [30]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
-
-<span class="s2">SELECT ar.Name AS artist,</span>
-<span class="s2">       COUNT(tr.TrackId) AS track_count</span>
-<span class="s2">FROM artist AS ar</span>
-<span class="s2">JOIN album AS al ON ar.ArtistId = al.ArtistId</span>
-<span class="s2">JOIN track AS tr ON al.AlbumId = tr.AlbumId</span>
-<span class="s2">GROUP BY ar.ArtistId</span>
-<span class="s2">ORDER BY track_count DESC ;</span>
-
-<span class="s2">"""</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-<span class="n">df</span>
-</pre></div>
+<h3 id="3)-Write-a-CTE-to-compute-total-invoice-amount-per-country,-then-select-countries-with-revenue-%3E-500.">3) Write a CTE to compute total invoice amount per country, then select countries with revenue &gt; 500.<a class="anchor-link" href="#3)-Write-a-CTE-to-compute-total-invoice-amount-per-country,-then-select-countries-with-revenue-%3E-500.">¶</a></h3>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[30]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>artist</th>
-<th>track_count</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>Iron Maiden</td>
-<td>213</td>
-</tr>
-<tr>
-<th>1</th>
-<td>U2</td>
-<td>135</td>
-</tr>
-<tr>
-<th>2</th>
-<td>Led Zeppelin</td>
-<td>114</td>
-</tr>
-<tr>
-<th>3</th>
-<td>Metallica</td>
-<td>112</td>
-</tr>
-<tr>
-<th>4</th>
-<td>Lost</td>
-<td>92</td>
-</tr>
-<tr>
-<th>...</th>
-<td>...</td>
-<td>...</td>
-</tr>
-<tr>
-<th>199</th>
-<td>Aaron Goldberg</td>
-<td>1</td>
-</tr>
-<tr>
-<th>200</th>
-<td>Luciana Souza/Romero Lubambo</td>
-<td>1</td>
-</tr>
-<tr>
-<th>201</th>
-<td>Cake</td>
-<td>1</td>
-</tr>
-<tr>
-<th>202</th>
-<td>Aquaman</td>
-<td>1</td>
-</tr>
-<tr>
-<th>203</th>
-<td>Dread Zeppelin</td>
-<td>1</td>
-</tr>
-</tbody>
-</table>
-<p>204 rows × 2 columns</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=6eb78dea-2027-4760-a286-d13f6327cdc2">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=8b6ac333-758d-4f3e-af2a-eb6df045b629">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="4)-Find-the-top-5-customers-by-total-invoice-amount.">4) Find the top 5 customers by total invoice amount.<a class="anchor-link" href="#4)-Find-the-top-5-customers-by-total-invoice-amount.">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d8acaa06-ac7e-4abb-8bee-d01dd144a32d">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [29]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># LIMIT version</span>
-
-<span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
-
-<span class="s2">SELECT CONCAT(c.FirstName, ' ', c.LastName) AS customer_name,</span>
-<span class="s2">       SUM(i.Total) AS total_invoice_amount</span>
-<span class="s2">FROM customer AS c</span>
-<span class="s2">JOIN invoice AS i ON c.CustomerId = i.CustomerId</span>
-<span class="s2">GROUP BY c.CustomerId</span>
-<span class="s2">ORDER BY total_invoice_amount DESC</span>
-<span class="s2">LIMIT 5 ;</span>
-
-<span class="s2">"""</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-<span class="n">df</span>
-</pre></div>
+<h3 id="4)-Find-tracks-that-cost-more-than-the-average-track-price-(subquery-in-WHERE).">4) Find tracks that cost more than the average track price (subquery in WHERE).<a class="anchor-link" href="#4)-Find-tracks-that-cost-more-than-the-average-track-price-(subquery-in-WHERE).">¶</a></h3>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[29]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>customer_name</th>
-<th>total_invoice_amount</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>Helena Holý</td>
-<td>49.62</td>
-</tr>
-<tr>
-<th>1</th>
-<td>Richard Cunningham</td>
-<td>47.62</td>
-</tr>
-<tr>
-<th>2</th>
-<td>Luis Rojas</td>
-<td>46.62</td>
-</tr>
-<tr>
-<th>3</th>
-<td>Ladislav Kovács</td>
-<td>45.62</td>
-</tr>
-<tr>
-<th>4</th>
-<td>Hugh O'Reilly</td>
-<td>45.62</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=54de48a8-2a6f-4e06-9584-e36e6c970fc5">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [28]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CTE version</span>
-
-<span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
-
-<span class="s2">WITH ranked_customers AS(</span>
-
-<span class="s2">SELECT CONCAT(c.FirstName, ' ', c.LastName) AS customer_name,</span>
-<span class="s2">       SUM(i.Total) AS total_invoice_amount,</span>
-<span class="s2">       RANK() OVER(ORDER BY SUM(i.Total) DESC) AS customer_rank</span>
-<span class="s2">FROM customer AS c</span>
-<span class="s2">JOIN invoice AS i ON c.CustomerId = i.CustomerId</span>
-<span class="s2">GROUP BY c.CustomerId</span>
-<span class="s2">ORDER BY total_invoice_amount DESC</span>
-<span class="s2">)</span>
-<span class="s2">SELECT *</span>
-<span class="s2">FROM ranked_customers</span>
-<span class="s2">WHERE customer_rank &lt;= 5</span>
-<span class="s2">ORDER BY total_invoice_amount ;</span>
-
-<span class="s2">"""</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-<span class="n">df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[28]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>customer_name</th>
-<th>total_invoice_amount</th>
-<th>customer_rank</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>Ladislav Kovács</td>
-<td>45.62</td>
-<td>4</td>
-</tr>
-<tr>
-<th>1</th>
-<td>Hugh O'Reilly</td>
-<td>45.62</td>
-<td>4</td>
-</tr>
-<tr>
-<th>2</th>
-<td>Luis Rojas</td>
-<td>46.62</td>
-<td>3</td>
-</tr>
-<tr>
-<th>3</th>
-<td>Richard Cunningham</td>
-<td>47.62</td>
-<td>2</td>
-</tr>
-<tr>
-<th>4</th>
-<td>Helena Holý</td>
-<td>49.62</td>
-<td>1</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1c6b5fa2-bd85-4f80-a57b-19adb2aa80e8">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b00c23b7-56df-40ea-9845-d9efecb85e5d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="5)-List-the-number-of-invoices-per-employee.">5) List the number of invoices per employee.<a class="anchor-link" href="#5)-List-the-number-of-invoices-per-employee.">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=544545b4-6f8d-4964-9bf5-d644311a5db1">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [27]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
-
-<span class="s2">SELECT CONCAT(e.FirstName, ' ', e.LastName) AS employee_name,</span>
-<span class="s2">       COUNT(i.InvoiceId) AS invoice_count</span>
-<span class="s2">FROM employee AS e</span>
-<span class="s2">JOIN customer AS c ON e.EmployeeId = c.SupportRepId</span>
-<span class="s2">JOIN invoice AS i ON c.CustomerId = i.CustomerId</span>
-<span class="s2">GROUP BY e.EmployeeId</span>
-<span class="s2">ORDER BY employee_name</span>
-
-<span class="s2">"""</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-<span class="n">df</span>
-</pre></div>
+<h3 id="5)-Use-a-CTE-to-rank-artists-by-number-of-tracks.">5) Use a CTE to rank artists by number of tracks.<a class="anchor-link" href="#5)-Use-a-CTE-to-rank-artists-by-number-of-tracks.">¶</a></h3>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[27]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>employee_name</th>
-<th>invoice_count</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>Jane Peacock</td>
-<td>146</td>
-</tr>
-<tr>
-<th>1</th>
-<td>Margaret Park</td>
-<td>140</td>
-</tr>
-<tr>
-<th>2</th>
-<td>Steve Johnson</td>
-<td>126</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3cc1745d-059a-4e07-aa22-4895a6c0ee30">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=75fa2d68-2d0a-4724-8822-56d008343116">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="6)-Show-total-revenue-per-genre.">6) Show total revenue per genre.<a class="anchor-link" href="#6)-Show-total-revenue-per-genre.">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ab550ab8-f41f-4f3e-b54c-9dfa356a5fd0">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [26]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
-
-<span class="s2">SELECT g.Name AS genre_name,</span>
-<span class="s2">       SUM(il.UnitPrice * il.Quantity) AS total_revenue</span>
-<span class="s2">FROM genre AS g</span>
-<span class="s2">JOIN track AS t ON g.GenreId = t.GenreId</span>
-<span class="s2">JOIN invoiceline AS il ON t.TrackId = il.TrackId</span>
-<span class="s2">GROUP BY g.GenreId</span>
-<span class="s2">ORDER BY total_revenue DESC</span>
-
-<span class="s2">"""</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-<span class="n">df</span>
-</pre></div>
+<h3 id="6)-Find-customers-whose-invoices-exceed-the-average-invoice-total.">6) Find customers whose invoices exceed the average invoice total.<a class="anchor-link" href="#6)-Find-customers-whose-invoices-exceed-the-average-invoice-total.">¶</a></h3>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[26]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>genre_name</th>
-<th>total_revenue</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>Rock</td>
-<td>826.65</td>
-</tr>
-<tr>
-<th>1</th>
-<td>Latin</td>
-<td>382.14</td>
-</tr>
-<tr>
-<th>2</th>
-<td>Metal</td>
-<td>261.36</td>
-</tr>
-<tr>
-<th>3</th>
-<td>Alternative &amp; Punk</td>
-<td>241.56</td>
-</tr>
-<tr>
-<th>4</th>
-<td>TV Shows</td>
-<td>93.53</td>
-</tr>
-<tr>
-<th>5</th>
-<td>Jazz</td>
-<td>79.20</td>
-</tr>
-<tr>
-<th>6</th>
-<td>Blues</td>
-<td>60.39</td>
-</tr>
-<tr>
-<th>7</th>
-<td>Drama</td>
-<td>57.71</td>
-</tr>
-<tr>
-<th>8</th>
-<td>Classical</td>
-<td>40.59</td>
-</tr>
-<tr>
-<th>9</th>
-<td>R&amp;B/Soul</td>
-<td>40.59</td>
-</tr>
-<tr>
-<th>10</th>
-<td>Sci Fi &amp; Fantasy</td>
-<td>39.80</td>
-</tr>
-<tr>
-<th>11</th>
-<td>Reggae</td>
-<td>29.70</td>
-</tr>
-<tr>
-<th>12</th>
-<td>Pop</td>
-<td>27.72</td>
-</tr>
-<tr>
-<th>13</th>
-<td>Soundtrack</td>
-<td>19.80</td>
-</tr>
-<tr>
-<th>14</th>
-<td>Comedy</td>
-<td>17.91</td>
-</tr>
-<tr>
-<th>15</th>
-<td>Hip Hop/Rap</td>
-<td>16.83</td>
-</tr>
-<tr>
-<th>16</th>
-<td>Bossa Nova</td>
-<td>14.85</td>
-</tr>
-<tr>
-<th>17</th>
-<td>Alternative</td>
-<td>13.86</td>
-</tr>
-<tr>
-<th>18</th>
-<td>World</td>
-<td>12.87</td>
-</tr>
-<tr>
-<th>19</th>
-<td>Science Fiction</td>
-<td>11.94</td>
-</tr>
-<tr>
-<th>20</th>
-<td>Electronica/Dance</td>
-<td>11.88</td>
-</tr>
-<tr>
-<th>21</th>
-<td>Heavy Metal</td>
-<td>11.88</td>
-</tr>
-<tr>
-<th>22</th>
-<td>Easy Listening</td>
-<td>9.90</td>
-</tr>
-<tr>
-<th>23</th>
-<td>Rock And Roll</td>
-<td>5.94</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f819f55b-aed1-4ed3-af70-2458b33764ef">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a02c075b-c048-491b-9516-5daa306bc8d8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="7)-Find-artists-with-more-than-20-tracks-in-the-database.">7) Find artists with more than 20 tracks in the database.<a class="anchor-link" href="#7)-Find-artists-with-more-than-20-tracks-in-the-database.">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0b58d196-081b-4d3b-b000-6879dd216d5a">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [46]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># LIMIT version</span>
-
-<span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
-
-<span class="s2">SELECT ar.Name AS artist_name,</span>
-<span class="s2">       COUNT(tr.TrackId) AS track_count</span>
-<span class="s2">FROM artist AS ar</span>
-<span class="s2">JOIN album AS al ON ar.ArtistId = al.ArtistId</span>
-<span class="s2">JOIN track AS tr ON al.AlbumId = tr.AlbumId</span>
-<span class="s2">GROUP BY ar.ArtistId</span>
-<span class="s2">ORDER BY track_count DESC</span>
-<span class="s2">LIMIT 55 ; -- manually determine number of rows that have 20+ track counts</span>
-
-<span class="s2">"""</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-<span class="n">df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[46]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>artist_name</th>
-<th>track_count</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>Iron Maiden</td>
-<td>213</td>
-</tr>
-<tr>
-<th>1</th>
-<td>U2</td>
-<td>135</td>
-</tr>
-<tr>
-<th>2</th>
-<td>Led Zeppelin</td>
-<td>114</td>
-</tr>
-<tr>
-<th>3</th>
-<td>Metallica</td>
-<td>112</td>
-</tr>
-<tr>
-<th>4</th>
-<td>Lost</td>
-<td>92</td>
-</tr>
-<tr>
-<th>5</th>
-<td>Deep Purple</td>
-<td>92</td>
-</tr>
-<tr>
-<th>6</th>
-<td>Pearl Jam</td>
-<td>67</td>
-</tr>
-<tr>
-<th>7</th>
-<td>Lenny Kravitz</td>
-<td>57</td>
-</tr>
-<tr>
-<th>8</th>
-<td>Various Artists</td>
-<td>56</td>
-</tr>
-<tr>
-<th>9</th>
-<td>The Office</td>
-<td>53</td>
-</tr>
-<tr>
-<th>10</th>
-<td>Van Halen</td>
-<td>52</td>
-</tr>
-<tr>
-<th>11</th>
-<td>Faith No More</td>
-<td>52</td>
-</tr>
-<tr>
-<th>12</th>
-<td>Os Paralamas Do Sucesso</td>
-<td>49</td>
-</tr>
-<tr>
-<th>13</th>
-<td>Red Hot Chili Peppers</td>
-<td>48</td>
-</tr>
-<tr>
-<th>14</th>
-<td>Eric Clapton</td>
-<td>48</td>
-</tr>
-<tr>
-<th>15</th>
-<td>Queen</td>
-<td>45</td>
-</tr>
-<tr>
-<th>16</th>
-<td>Foo Fighters</td>
-<td>44</td>
-</tr>
-<tr>
-<th>17</th>
-<td>Guns N' Roses</td>
-<td>42</td>
-</tr>
-<tr>
-<th>18</th>
-<td>The Rolling Stones</td>
-<td>41</td>
-</tr>
-<tr>
-<th>19</th>
-<td>R.E.M.</td>
-<td>41</td>
-</tr>
-<tr>
-<th>20</th>
-<td>Creedence Clearwater Revival</td>
-<td>40</td>
-</tr>
-<tr>
-<th>21</th>
-<td>Audioslave</td>
-<td>40</td>
-</tr>
-<tr>
-<th>22</th>
-<td>Titãs</td>
-<td>38</td>
-</tr>
-<tr>
-<th>23</th>
-<td>Miles Davis</td>
-<td>37</td>
-</tr>
-<tr>
-<th>24</th>
-<td>Chico Science &amp; Nação Zumbi</td>
-<td>36</td>
-</tr>
-<tr>
-<th>25</th>
-<td>Kiss</td>
-<td>35</td>
-</tr>
-<tr>
-<th>26</th>
-<td>Smashing Pumpkins</td>
-<td>34</td>
-</tr>
-<tr>
-<th>27</th>
-<td>Green Day</td>
-<td>34</td>
-</tr>
-<tr>
-<th>28</th>
-<td>Chico Buarque</td>
-<td>34</td>
-</tr>
-<tr>
-<th>29</th>
-<td>Ozzy Osbourne</td>
-<td>32</td>
-</tr>
-<tr>
-<th>30</th>
-<td>Jamiroquai</td>
-<td>32</td>
-</tr>
-<tr>
-<th>31</th>
-<td>Gilberto Gil</td>
-<td>32</td>
-</tr>
-<tr>
-<th>32</th>
-<td>Legião Urbana</td>
-<td>31</td>
-</tr>
-<tr>
-<th>33</th>
-<td>Cidade Negra</td>
-<td>31</td>
-</tr>
-<tr>
-<th>34</th>
-<td>Antônio Carlos Jobim</td>
-<td>31</td>
-</tr>
-<tr>
-<th>35</th>
-<td>Tim Maia</td>
-<td>30</td>
-</tr>
-<tr>
-<th>36</th>
-<td>The Cult</td>
-<td>30</td>
-</tr>
-<tr>
-<th>37</th>
-<td>Cássia Eller</td>
-<td>30</td>
-</tr>
-<tr>
-<th>38</th>
-<td>Nirvana</td>
-<td>29</td>
-</tr>
-<tr>
-<th>39</th>
-<td>Lulu Santos</td>
-<td>28</td>
-</tr>
-<tr>
-<th>40</th>
-<td>Santana</td>
-<td>27</td>
-</tr>
-<tr>
-<th>41</th>
-<td>The Tea Party</td>
-<td>26</td>
-</tr>
-<tr>
-<th>42</th>
-<td>Djavan</td>
-<td>26</td>
-</tr>
-<tr>
-<th>43</th>
-<td>Milton Nascimento</td>
-<td>26</td>
-</tr>
-<tr>
-<th>44</th>
-<td>Battlestar Galactica (Classic)</td>
-<td>24</td>
-</tr>
-<tr>
-<th>45</th>
-<td>Frank Sinatra</td>
-<td>24</td>
-</tr>
-<tr>
-<th>46</th>
-<td>Amy Winehouse</td>
-<td>23</td>
-</tr>
-<tr>
-<th>47</th>
-<td>Heroes</td>
-<td>23</td>
-</tr>
-<tr>
-<th>48</th>
-<td>Skank</td>
-<td>23</td>
-</tr>
-<tr>
-<th>49</th>
-<td>Gene Krupa</td>
-<td>22</td>
-</tr>
-<tr>
-<th>50</th>
-<td>Spyro Gyra</td>
-<td>21</td>
-</tr>
-<tr>
-<th>51</th>
-<td>Caetano Veloso</td>
-<td>21</td>
-</tr>
-<tr>
-<th>52</th>
-<td>Battlestar Galactica</td>
-<td>20</td>
-</tr>
-<tr>
-<th>53</th>
-<td>The Who</td>
-<td>20</td>
-</tr>
-<tr>
-<th>54</th>
-<td>James Brown</td>
-<td>20</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=358d0db5-3409-4f91-948b-d50af7e3c80b">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [45]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># CTE version</span>
-<span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
-
-<span class="s2">WITH artist_track_counts AS(</span>
-<span class="s2">SELECT ar.Name AS artist_name,</span>
-<span class="s2">       COUNT(tr.TrackId) AS track_count</span>
-<span class="s2">FROM artist AS ar</span>
-<span class="s2">JOIN album AS al ON ar.ArtistId = al.ArtistId</span>
-<span class="s2">JOIN track AS tr ON al.AlbumId = tr.AlbumId</span>
-<span class="s2">GROUP BY ar.ArtistId</span>
-<span class="s2">ORDER BY track_count DESC </span>
-<span class="s2">)</span>
-<span class="s2">SELECT *</span>
-<span class="s2">FROM artist_track_counts</span>
-<span class="s2">WHERE track_count &gt;= 20 -- filter for artists that have 20+ track counts</span>
-<span class="s2">ORDER BY track_count DESC ;</span>
-
-<span class="s2">"""</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
-<span class="n">df</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[45]:</div>
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
-<div>
-<style scoped="">
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-<thead>
-<tr style="text-align: right;">
-<th></th>
-<th>artist_name</th>
-<th>track_count</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<th>0</th>
-<td>Iron Maiden</td>
-<td>213</td>
-</tr>
-<tr>
-<th>1</th>
-<td>U2</td>
-<td>135</td>
-</tr>
-<tr>
-<th>2</th>
-<td>Led Zeppelin</td>
-<td>114</td>
-</tr>
-<tr>
-<th>3</th>
-<td>Metallica</td>
-<td>112</td>
-</tr>
-<tr>
-<th>4</th>
-<td>Lost</td>
-<td>92</td>
-</tr>
-<tr>
-<th>5</th>
-<td>Deep Purple</td>
-<td>92</td>
-</tr>
-<tr>
-<th>6</th>
-<td>Pearl Jam</td>
-<td>67</td>
-</tr>
-<tr>
-<th>7</th>
-<td>Lenny Kravitz</td>
-<td>57</td>
-</tr>
-<tr>
-<th>8</th>
-<td>Various Artists</td>
-<td>56</td>
-</tr>
-<tr>
-<th>9</th>
-<td>The Office</td>
-<td>53</td>
-</tr>
-<tr>
-<th>10</th>
-<td>Van Halen</td>
-<td>52</td>
-</tr>
-<tr>
-<th>11</th>
-<td>Faith No More</td>
-<td>52</td>
-</tr>
-<tr>
-<th>12</th>
-<td>Os Paralamas Do Sucesso</td>
-<td>49</td>
-</tr>
-<tr>
-<th>13</th>
-<td>Red Hot Chili Peppers</td>
-<td>48</td>
-</tr>
-<tr>
-<th>14</th>
-<td>Eric Clapton</td>
-<td>48</td>
-</tr>
-<tr>
-<th>15</th>
-<td>Queen</td>
-<td>45</td>
-</tr>
-<tr>
-<th>16</th>
-<td>Foo Fighters</td>
-<td>44</td>
-</tr>
-<tr>
-<th>17</th>
-<td>Guns N' Roses</td>
-<td>42</td>
-</tr>
-<tr>
-<th>18</th>
-<td>The Rolling Stones</td>
-<td>41</td>
-</tr>
-<tr>
-<th>19</th>
-<td>R.E.M.</td>
-<td>41</td>
-</tr>
-<tr>
-<th>20</th>
-<td>Creedence Clearwater Revival</td>
-<td>40</td>
-</tr>
-<tr>
-<th>21</th>
-<td>Audioslave</td>
-<td>40</td>
-</tr>
-<tr>
-<th>22</th>
-<td>Titãs</td>
-<td>38</td>
-</tr>
-<tr>
-<th>23</th>
-<td>Miles Davis</td>
-<td>37</td>
-</tr>
-<tr>
-<th>24</th>
-<td>Chico Science &amp; Nação Zumbi</td>
-<td>36</td>
-</tr>
-<tr>
-<th>25</th>
-<td>Kiss</td>
-<td>35</td>
-</tr>
-<tr>
-<th>26</th>
-<td>Smashing Pumpkins</td>
-<td>34</td>
-</tr>
-<tr>
-<th>27</th>
-<td>Green Day</td>
-<td>34</td>
-</tr>
-<tr>
-<th>28</th>
-<td>Chico Buarque</td>
-<td>34</td>
-</tr>
-<tr>
-<th>29</th>
-<td>Ozzy Osbourne</td>
-<td>32</td>
-</tr>
-<tr>
-<th>30</th>
-<td>Jamiroquai</td>
-<td>32</td>
-</tr>
-<tr>
-<th>31</th>
-<td>Gilberto Gil</td>
-<td>32</td>
-</tr>
-<tr>
-<th>32</th>
-<td>Legião Urbana</td>
-<td>31</td>
-</tr>
-<tr>
-<th>33</th>
-<td>Cidade Negra</td>
-<td>31</td>
-</tr>
-<tr>
-<th>34</th>
-<td>Antônio Carlos Jobim</td>
-<td>31</td>
-</tr>
-<tr>
-<th>35</th>
-<td>Tim Maia</td>
-<td>30</td>
-</tr>
-<tr>
-<th>36</th>
-<td>The Cult</td>
-<td>30</td>
-</tr>
-<tr>
-<th>37</th>
-<td>Cássia Eller</td>
-<td>30</td>
-</tr>
-<tr>
-<th>38</th>
-<td>Nirvana</td>
-<td>29</td>
-</tr>
-<tr>
-<th>39</th>
-<td>Lulu Santos</td>
-<td>28</td>
-</tr>
-<tr>
-<th>40</th>
-<td>Santana</td>
-<td>27</td>
-</tr>
-<tr>
-<th>41</th>
-<td>The Tea Party</td>
-<td>26</td>
-</tr>
-<tr>
-<th>42</th>
-<td>Djavan</td>
-<td>26</td>
-</tr>
-<tr>
-<th>43</th>
-<td>Milton Nascimento</td>
-<td>26</td>
-</tr>
-<tr>
-<th>44</th>
-<td>Battlestar Galactica (Classic)</td>
-<td>24</td>
-</tr>
-<tr>
-<th>45</th>
-<td>Frank Sinatra</td>
-<td>24</td>
-</tr>
-<tr>
-<th>46</th>
-<td>Amy Winehouse</td>
-<td>23</td>
-</tr>
-<tr>
-<th>47</th>
-<td>Heroes</td>
-<td>23</td>
-</tr>
-<tr>
-<th>48</th>
-<td>Skank</td>
-<td>23</td>
-</tr>
-<tr>
-<th>49</th>
-<td>Gene Krupa</td>
-<td>22</td>
-</tr>
-<tr>
-<th>50</th>
-<td>Spyro Gyra</td>
-<td>21</td>
-</tr>
-<tr>
-<th>51</th>
-<td>Caetano Veloso</td>
-<td>21</td>
-</tr>
-<tr>
-<th>52</th>
-<td>Battlestar Galactica</td>
-<td>20</td>
-</tr>
-<tr>
-<th>53</th>
-<td>The Who</td>
-<td>20</td>
-</tr>
-<tr>
-<th>54</th>
-<td>James Brown</td>
-<td>20</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<h3 id="7)-List-the-top-3-most-popular-tracks-per-genre-using-a-subquery.">7) List the top 3 most popular tracks per genre using a subquery.<a class="anchor-link" href="#7)-List-the-top-3-most-popular-tracks-per-genre-using-a-subquery.">¶</a></h3>
 </div>
 </div>
 </div>
