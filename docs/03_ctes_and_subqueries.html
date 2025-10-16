@@ -7511,14 +7511,14 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=bc18f389-5a2b-4fd9-84b3-6562be39939d">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=422d6752-436c-4fd3-b8c4-6869d1443334">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="SQL-Examples:-Common-Table-Expressions-(CTEs)-and-Subqueries">SQL Examples: Common Table Expressions (CTEs) and Subqueries<a class="anchor-link" href="#SQL-Examples:-Common-Table-Expressions-(CTEs)-and-Subqueries">¶</a></h1><p>This notebook continues my SQL practice with the Chinook database, focusing on building layered and reusable queries through CTEs and subqueries.</p>
-<p>This notebook is a work-in-progress.  1 of the 7 queries are provided.</p>
+<p>This notebook is a work-in-progress.  2 of the 7 queries are provided.</p>
 <p>These exercises demonstrate practical use of:</p>
 <ul>
 <li>CTEs to structure multi-step analyses and improve query readability</li>
@@ -7558,7 +7558,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -7625,12 +7625,12 @@ a.anchor-link {
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=9a084a28-5ccc-4450-8b77-f372d848e3aa">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c57b8386-2f47-4545-b728-8e9d2e4f29ab">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
@@ -7665,12 +7665,58 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=dcc2e37f-b8a4-4502-adf1-aceb697a3d4f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="2)-Using-a-subquery,-find-the-genres-whose-tracks-are,-on-average,-are-the-most-expensive.">2) Using a subquery, find the genres whose tracks are, on average, are the most expensive.<a class="anchor-link" href="#2)-Using-a-subquery,-find-the-genres-whose-tracks-are,-on-average,-are-the-most-expensive.">¶</a></h3>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6361b3cb-5ae5-4ee8-a1a8-e9a1b4cde96f">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
+
+<span class="s2">SELECT </span>
+<span class="s2">     g.name AS genre_name,</span>
+<span class="s2">     AVG(t.UnitPrice) AS average_track_price</span>
+<span class="s2">FROM track AS t</span>
+<span class="s2">JOIN genre AS g</span>
+<span class="s2">  ON t.GenreId = g.GenreId</span>
+<span class="s2">GROUP BY g.GenreId </span>
+<span class="s2">  HAVING AVG(t.UnitPrice) = (</span>
+<span class="s2">    SELECT MAX(average_price) --filtering by genres that have average max price</span>
+<span class="s2">    FROM (</span>
+<span class="s2">        SELECT </span>
+<span class="s2">             AVG(UnitPrice) AS average_price</span>
+<span class="s2">        FROM track</span>
+<span class="s2">        GROUP BY GenreId </span>
+<span class="s2">     ) AS genre_averages</span>
+<span class="s2">);</span>
+
+<span class="s2">"""</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
 <div class="jp-Cell-outputWrapper">
 <div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7690,119 +7736,39 @@ a.anchor-link {
 <thead>
 <tr style="text-align: right;">
 <th></th>
-<th>customer_name</th>
-<th>InvoiceId</th>
-<th>InvoiceDate</th>
-<th>Total</th>
+<th>genre_name</th>
+<th>average_track_price</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <th>0</th>
-<td>Astrid Gruber</td>
-<td>78</td>
-<td>2021-12-08 00:00:00</td>
-<td>1.98</td>
+<td>Science Fiction</td>
+<td>1.99</td>
 </tr>
 <tr>
 <th>1</th>
-<td>Astrid Gruber</td>
-<td>89</td>
-<td>2022-01-18 00:00:00</td>
-<td>18.86</td>
+<td>TV Shows</td>
+<td>1.99</td>
 </tr>
 <tr>
 <th>2</th>
-<td>Astrid Gruber</td>
-<td>144</td>
-<td>2022-09-18 00:00:00</td>
-<td>8.91</td>
+<td>Sci Fi &amp; Fantasy</td>
+<td>1.99</td>
 </tr>
 <tr>
 <th>3</th>
-<td>Astrid Gruber</td>
-<td>273</td>
-<td>2024-04-24 00:00:00</td>
-<td>1.98</td>
+<td>Drama</td>
+<td>1.99</td>
 </tr>
 <tr>
 <th>4</th>
-<td>Astrid Gruber</td>
-<td>296</td>
-<td>2024-07-27 00:00:00</td>
-<td>3.96</td>
-</tr>
-<tr>
-<th>...</th>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-</tr>
-<tr>
-<th>65</th>
-<td>Victor Stevens</td>
-<td>190</td>
-<td>2023-04-18 00:00:00</td>
-<td>1.98</td>
-</tr>
-<tr>
-<th>66</th>
-<td>Victor Stevens</td>
-<td>201</td>
-<td>2023-05-29 00:00:00</td>
-<td>18.86</td>
-</tr>
-<tr>
-<th>67</th>
-<td>Victor Stevens</td>
-<td>256</td>
-<td>2024-01-27 00:00:00</td>
-<td>8.91</td>
-</tr>
-<tr>
-<th>68</th>
-<td>Victor Stevens</td>
-<td>385</td>
-<td>2025-09-02 00:00:00</td>
-<td>1.98</td>
-</tr>
-<tr>
-<th>69</th>
-<td>Victor Stevens</td>
-<td>408</td>
-<td>2025-12-05 00:00:00</td>
-<td>3.96</td>
+<td>Comedy</td>
+<td>1.99</td>
 </tr>
 </tbody>
 </table>
-<p>70 rows × 4 columns</p>
 </div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e02dcce4-0ccc-4d44-8f5b-4cb5d8045a09">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="2)-Use-a-subquery-to-find-the-genre-with-the-highest-average-track-price.">2) Use a subquery to find the genre with the highest average track price.<a class="anchor-link" href="#2)-Use-a-subquery-to-find-the-genre-with-the-highest-average-track-price.">¶</a></h3>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=aad1f6f9-d5f7-46bc-a51e-2ec396de1c56">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
-</pre></div>
 </div>
 </div>
 </div>
