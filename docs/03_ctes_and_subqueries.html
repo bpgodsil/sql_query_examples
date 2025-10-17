@@ -7511,14 +7511,14 @@ a.anchor-link {
 <!-- End of mermaid configuration --></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=415ed331-0ab8-4c16-ac14-4456d9abb4c0">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=612c05e4-d7ff-42b0-95fa-44ed3316b9ee">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="SQL-Examples:-Common-Table-Expressions-(CTEs)-and-Subqueries">SQL Examples: Common Table Expressions (CTEs) and Subqueries<a class="anchor-link" href="#SQL-Examples:-Common-Table-Expressions-(CTEs)-and-Subqueries">¶</a></h1><p>This notebook continues my SQL practice with the Chinook database, focusing on building layered and reusable queries through CTEs and subqueries.</p>
-<p>This notebook is a work-in-progress.  4 of the 7 queries are provided.</p>
+<p>This notebook is a work-in-progress.  6 of the 7 queries are provided.</p>
 <p>These exercises demonstrate practical use of:</p>
 <ul>
 <li>CTEs to structure multi-step analyses and improve query readability</li>
@@ -7558,7 +7558,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -8023,6 +8023,161 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b8011f59-98b6-4e47-b7f6-72d9b743761c">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
+
+<span class="s2">WITH track_counts AS (   </span>
+<span class="s2">    SELECT </span>
+<span class="s2">         ar.ArtistId,</span>
+<span class="s2">         ar.Name AS artist_name,</span>
+<span class="s2">         COUNT(tr.TrackId) as track_count</span>
+<span class="s2">    FROM artist AS ar</span>
+<span class="s2">    LEFT JOIN album AS al </span>
+<span class="s2">      ON ar.ArtistId = al.ArtistId</span>
+<span class="s2">    JOIN track AS tr</span>
+<span class="s2">      ON al.AlbumId = tr.AlbumId</span>
+<span class="s2">    GROUP BY ar.ArtistId, ar.Name</span>
+<span class="s2">)</span>
+<span class="s2">SELECT </span>
+<span class="s2">    ArtistId,</span>
+<span class="s2">    artist_name,</span>
+<span class="s2">    track_count,</span>
+<span class="s2">    DENSE_RANK() OVER(ORDER BY track_count DESC, artist_name) AS rank_by_track_counts</span>
+<span class="s2">FROM track_counts</span>
+<span class="s2">ORDER BY track_count DESC</span>
+
+<span class="s2">"""</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+<span class="n">df</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>ArtistId</th>
+<th>artist_name</th>
+<th>track_count</th>
+<th>rank_by_track_counts</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>90</td>
+<td>Iron Maiden</td>
+<td>213</td>
+<td>1</td>
+</tr>
+<tr>
+<th>1</th>
+<td>150</td>
+<td>U2</td>
+<td>135</td>
+<td>2</td>
+</tr>
+<tr>
+<th>2</th>
+<td>22</td>
+<td>Led Zeppelin</td>
+<td>114</td>
+<td>3</td>
+</tr>
+<tr>
+<th>3</th>
+<td>50</td>
+<td>Metallica</td>
+<td>112</td>
+<td>4</td>
+</tr>
+<tr>
+<th>4</th>
+<td>58</td>
+<td>Deep Purple</td>
+<td>92</td>
+<td>5</td>
+</tr>
+<tr>
+<th>...</th>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<th>199</th>
+<td>259</td>
+<td>The 12 Cellists of The Berlin Philharmonic</td>
+<td>1</td>
+<td>200</td>
+</tr>
+<tr>
+<th>200</th>
+<td>231</td>
+<td>Ton Koopman</td>
+<td>1</td>
+<td>201</td>
+</tr>
+<tr>
+<th>201</th>
+<td>211</td>
+<td>Wilhelm Kempff</td>
+<td>1</td>
+<td>202</td>
+</tr>
+<tr>
+<th>202</th>
+<td>255</td>
+<td>Yehudi Menuhin</td>
+<td>1</td>
+<td>203</td>
+</tr>
+<tr>
+<th>203</th>
+<td>212</td>
+<td>Yo-Yo Ma</td>
+<td>1</td>
+<td>204</td>
+</tr>
+</tbody>
+</table>
+<p>204 rows × 4 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=75fa2d68-2d0a-4724-8822-56d008343116">
 <div class="jp-Cell-inputWrapper" tabindex="0">
@@ -8031,6 +8186,108 @@ a.anchor-link {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="6)-Find-customers-whose-invoices-exceed-the-average-invoice-total.">6) Find customers whose invoices exceed the average invoice total.<a class="anchor-link" href="#6)-Find-customers-whose-invoices-exceed-the-average-invoice-total.">¶</a></h3>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c2ddc7b2-69dd-4c85-9962-926aa7a6f228">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [33]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
+
+<span class="s2">SELECT DISTINCT</span>
+<span class="s2">    CONCAT(c.FirstName, ' ', c.LastName) AS customer_name</span>
+<span class="s2">FROM customer AS c</span>
+<span class="s2">JOIN invoice AS i</span>
+<span class="s2">  ON c.CustomerId = i.CustomerId</span>
+<span class="s2">WHERE i.Total &gt; (SELECT AVG(Total) FROM invoice)</span>
+<span class="s2">ORDER BY customer_name</span>
+
+<span class="s2">"""</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># showing just the top 10 customer_names</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[33]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>customer_name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>Aaron Mitchell</td>
+</tr>
+<tr>
+<th>1</th>
+<td>Alexandre Rocha</td>
+</tr>
+<tr>
+<th>2</th>
+<td>Astrid Gruber</td>
+</tr>
+<tr>
+<th>3</th>
+<td>Bjørn Hansen</td>
+</tr>
+<tr>
+<th>4</th>
+<td>Camille Bernard</td>
+</tr>
+<tr>
+<th>5</th>
+<td>Daan Peeters</td>
+</tr>
+<tr>
+<th>6</th>
+<td>Dan Miller</td>
+</tr>
+<tr>
+<th>7</th>
+<td>Diego Gutiérrez</td>
+</tr>
+<tr>
+<th>8</th>
+<td>Dominique Lefebvre</td>
+</tr>
+<tr>
+<th>9</th>
+<td>Eduardo Martins</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -8045,7 +8302,7 @@ a.anchor-link {
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=df046305-d172-4710-b2a3-98fec9d67464">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f7333fa4-7522-47af-9469-aaef5af556b0">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
