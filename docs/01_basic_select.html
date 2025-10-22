@@ -7556,7 +7556,7 @@ I’m using it to demonstrate clear, well-structured query writing in a Jupyter 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -7628,12 +7628,12 @@ I’m using it to demonstrate clear, well-structured query writing in a Jupyter 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
 
-<span class="s2">SELECT DISTINCT CONCAT(FirstName, ' ', LastName) as customer_name</span>
+<span class="s2">SELECT DISTINCT TRIM(FirstName || ' ' || LastName) as customer_name</span>
 <span class="s2">FROM customer </span>
 <span class="s2">ORDER BY customer_name </span>
 <span class="s2">LIMIT 10 ;</span>
@@ -7651,7 +7651,7 @@ I’m using it to demonstrate clear, well-structured query writing in a Jupyter 
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7738,16 +7738,16 @@ I’m using it to demonstrate clear, well-structured query writing in a Jupyter 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
 
-<span class="s2">SELECT CONCAT(c.FirstName, ' ', c.LastName) as customer_name,</span>
+<span class="s2">SELECT TRIM(c.FirstName || ' ' || c.LastName) AS customer_name,</span>
 <span class="s2">       COUNT(i.InvoiceId) AS invoice_count</span>
 <span class="s2">FROM customer AS c</span>
 <span class="s2">JOIN invoice AS i ON c.CustomerId = i.CustomerId</span>
-<span class="s2">GROUP BY c.CustomerId</span>
+<span class="s2">GROUP BY c.CustomerId, c.FirstName, c.LastName</span>
 <span class="s2">ORDER BY customer_name</span>
 <span class="s2">LIMIT 10;</span>
 
@@ -7764,7 +7764,7 @@ I’m using it to demonstrate clear, well-structured query writing in a Jupyter 
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[16]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
