@@ -8406,6 +8406,213 @@ a.anchor-link {
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6c9e434c-3aa9-4798-9060-93f309bd259b">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [28]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Version 2: Using invoice-item sequence, which finds the tracks on the subsequent invoice. Assumes "next track is on the next invoice"</span>
+<span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
+
+<span class="s2">WITH invoice_id_first_next AS(</span>
+<span class="s2">    -- match each invoice to the customer's next invoice (by date then id)</span>
+<span class="s2">    SELECT</span>
+<span class="s2">         c.CustomerId,</span>
+<span class="s2">         TRIM(c.FirstName ||' ' || c.LastName) AS customer_name,</span>
+<span class="s2">         i.InvoiceId AS first_invoice_id,</span>
+<span class="s2">         i.InvoiceDate AS first_invoice_date,</span>
+<span class="s2">        LEAD(i.InvoiceId) OVER( </span>
+<span class="s2">             PARTITION BY c.CustomerId </span>
+<span class="s2">             ORDER BY i.InvoiceDate, i.InvoiceId </span>
+<span class="s2">          ) AS next_invoice_id_raw,</span>
+<span class="s2">        LEAD(i.InvoiceDate) OVER( </span>
+<span class="s2">             PARTITION BY c.CustomerId </span>
+<span class="s2">             ORDER BY i.InvoiceDate, i.InvoiceId </span>
+<span class="s2">        ) AS next_invoice_date</span>
+<span class="s2">    FROM customer AS c</span>
+<span class="s2">    JOIN invoice AS i</span>
+<span class="s2">     ON c.CustomerId = i.CustomerId    </span>
+<span class="s2">),</span>
+<span class="s2">invoice_tracks AS(</span>
+<span class="s2">    -- spread track names for a single invoice into a single row</span>
+<span class="s2">    SELECT</span>
+<span class="s2">         i.InvoiceId,</span>
+<span class="s2">         GROUP_CONCAT(t.Name, ', ') AS next_invoice_tracks -- concatenates tracks of an invoice into one string, allowing single-row display (for MySQL &amp; SQLite; consider STRING_AGG() elsewhere)</span>
+<span class="s2">    FROM invoice AS i</span>
+<span class="s2">    JOIN invoiceline AS il</span>
+<span class="s2">      ON i.InvoiceId = il.InvoiceId</span>
+<span class="s2">    JOIN track AS t</span>
+<span class="s2">      ON il.TrackId = t.TrackId</span>
+<span class="s2">    GROUP BY i.InvoiceId</span>
+<span class="s2">)</span>
+<span class="s2">SELECT</span>
+<span class="s2">     iifn.CustomerId,</span>
+<span class="s2">     iifn.customer_name,</span>
+<span class="s2">     iifn.first_invoice_id,</span>
+<span class="s2">     iifn.first_invoice_date,</span>
+<span class="s2">     -- cast outside the window function to get an integer in SQLite</span>
+<span class="s2">     CAST(iifn.next_invoice_id_raw AS INTEGER) AS next_invoice_id,</span>
+<span class="s2">     iifn.next_invoice_date,</span>
+<span class="s2">     it.next_invoice_tracks</span>
+<span class="s2">FROM invoice_id_first_next AS iifn</span>
+<span class="s2">LEFT JOIN invoice_tracks AS it</span>
+<span class="s2">  ON CAST(iifn.next_invoice_id_raw AS INTEGER) = it.InvoiceId   -- Join that matches tracks string to the next invoice, if any</span>
+<span class="s2">ORDER BY iifn.CustomerId, iifn.first_invoice_date, iifn.next_invoice_id_raw</span>
+
+<span class="s2">"""</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="c1"># showing top 10</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[28]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>CustomerId</th>
+<th>customer_name</th>
+<th>first_invoice_id</th>
+<th>first_invoice_date</th>
+<th>next_invoice_id</th>
+<th>next_invoice_date</th>
+<th>next_invoice_tracks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>1</td>
+<td>Luís Gonçalves</td>
+<td>98</td>
+<td>2022-03-11 00:00:00</td>
+<td>121.0</td>
+<td>2022-06-13 00:00:00</td>
+<td>Shout It Out Loud, Calling Dr. Love, Strutter,...</td>
+</tr>
+<tr>
+<th>1</th>
+<td>1</td>
+<td>Luís Gonçalves</td>
+<td>121</td>
+<td>2022-06-13 00:00:00</td>
+<td>143.0</td>
+<td>2022-09-15 00:00:00</td>
+<td>Think About You, Rocket Queen, Don't Cry (Orig...</td>
+</tr>
+<tr>
+<th>2</th>
+<td>1</td>
+<td>Luís Gonçalves</td>
+<td>143</td>
+<td>2022-09-15 00:00:00</td>
+<td>195.0</td>
+<td>2023-05-06 00:00:00</td>
+<td>All Along The Watchtower</td>
+</tr>
+<tr>
+<th>3</th>
+<td>1</td>
+<td>Luís Gonçalves</td>
+<td>195</td>
+<td>2023-05-06 00:00:00</td>
+<td>316.0</td>
+<td>2024-10-27 00:00:00</td>
+<td>Karelia Suite, Op.11: 2. Ballade (Tempo Di Men...</td>
+</tr>
+<tr>
+<th>4</th>
+<td>1</td>
+<td>Luís Gonçalves</td>
+<td>316</td>
+<td>2024-10-27 00:00:00</td>
+<td>327.0</td>
+<td>2024-12-07 00:00:00</td>
+<td>Interlude Zumbi, Rios Pontes &amp; Overdrives, Lix...</td>
+</tr>
+<tr>
+<th>5</th>
+<td>1</td>
+<td>Luís Gonçalves</td>
+<td>327</td>
+<td>2024-12-07 00:00:00</td>
+<td>382.0</td>
+<td>2025-08-07 00:00:00</td>
+<td>Vamo Batê Lata, Mensagen De Amor (2000), Saber...</td>
+</tr>
+<tr>
+<th>6</th>
+<td>1</td>
+<td>Luís Gonçalves</td>
+<td>382</td>
+<td>2025-08-07 00:00:00</td>
+<td>NaN</td>
+<td>None</td>
+<td>None</td>
+</tr>
+<tr>
+<th>7</th>
+<td>2</td>
+<td>Leonie Köhler</td>
+<td>1</td>
+<td>2021-01-01 00:00:00</td>
+<td>12.0</td>
+<td>2021-02-11 00:00:00</td>
+<td>Lavadeira, Dazed and Confused, You Shook Me(2)...</td>
+</tr>
+<tr>
+<th>8</th>
+<td>2</td>
+<td>Leonie Köhler</td>
+<td>12</td>
+<td>2021-02-11 00:00:00</td>
+<td>67.0</td>
+<td>2021-10-12 00:00:00</td>
+<td>Beach Sequence, Plot 180, Murders In The Rue M...</td>
+</tr>
+<tr>
+<th>9</th>
+<td>2</td>
+<td>Leonie Köhler</td>
+<td>67</td>
+<td>2021-10-12 00:00:00</td>
+<td>196.0</td>
+<td>2023-05-19 00:00:00</td>
+<td>I Still Haven't Found What I'm Looking for, Fr...</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4fe7ed76-6f44-438b-8d52-34e50a716ecb">
 <div class="jp-Cell-inputWrapper" tabindex="0">
