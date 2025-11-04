@@ -7,7 +7,9 @@ A small, personal collection of Jupyter notebooks to practice and demonstrate SQ
 ## What’s in this repo
 - `data/Chinook_Sqlite.sqlite` — Chinook SQLite database (sample data)
 - `notebooks/01_basic_select.ipynb` — basic SELECT, filtering, sorting
-- `notebooks/02_joins_and_aggregations.ipynb` — joins, aggregations, CTE examples, windows function
+- `notebooks/02_joins_and_aggregations.ipynb` — joins, aggregations, CTE examples, windows function (RANK)
+- `notebooks/03_ctes_and_subqueries.ipynb` — CTEs, subqueries, joins, windows function (DENSE_RANK)
+- `notebooks/04_window_functions.ipynb` — windows functions (SUM, DENSE_RANK, LAG, LEAD), CTEs
 - `environment.yml` — conda environment (reproducible)
 - `.gitignore` — ignore rules for notebooks and OS/IDE files
 
