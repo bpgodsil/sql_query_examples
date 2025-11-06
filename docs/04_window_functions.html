@@ -7549,7 +7549,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -8621,6 +8621,141 @@ a.anchor-link {
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h3 id="5)-Compute-running-totals-of-revenue-per-month.">5) Compute running totals of revenue per month.<a class="anchor-link" href="#5)-Compute-running-totals-of-revenue-per-month.">¶</a></h3>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a50bab66-d072-41cd-a7cd-ef4b6dc5ff18">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s2">"""</span>
+
+<span class="s2">WITH revenue_by_month AS(</span>
+<span class="s2">    -- calculating revenue by year and month</span>
+<span class="s2">    SELECT </span>
+<span class="s2">         CAST(strftime('%Y', i.InvoiceDate) AS INTEGER) AS year,</span>
+<span class="s2">         CAST(strftime('%m', i.InvoiceDate) AS INTEGER) AS month,</span>
+<span class="s2">         date(CAST(strftime('%Y', i.InvoiceDate) AS TEXT) ||'-' || CAST(strftime('%m', i.InvoiceDate) AS TEXT) || '-01' ) AS month_date,</span>
+<span class="s2">         SUM(i.Total) AS monthly_revenue</span>
+<span class="s2">    FROM invoice AS i</span>
+<span class="s2">    GROUP BY CAST(strftime('%Y', i.InvoiceDate) AS INTEGER), CAST(strftime('%m', i.InvoiceDate) AS INTEGER)</span>
+<span class="s2">)</span>
+<span class="s2">SELECT </span>
+<span class="s2">     month_date,</span>
+<span class="s2">     monthly_revenue,</span>
+<span class="s2">     -- calculating running total (aka cumulative sum)</span>
+<span class="s2">     SUM(monthly_revenue) OVER(ORDER BY month_date) AS cumulative_sum</span>
+<span class="s2">FROM revenue_by_month</span>
+<span class="s2">ORDER BY month_date ;</span>
+
+<span class="s2">"""</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">df</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">5</span><span class="p">)])</span> <span class="c1"># showing first 5 and last five months</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[19]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>month_date</th>
+<th>monthly_revenue</th>
+<th>cumulative_sum</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>2021-01-01</td>
+<td>35.64</td>
+<td>35.64</td>
+</tr>
+<tr>
+<th>1</th>
+<td>2021-02-01</td>
+<td>37.62</td>
+<td>73.26</td>
+</tr>
+<tr>
+<th>2</th>
+<td>2021-03-01</td>
+<td>37.62</td>
+<td>110.88</td>
+</tr>
+<tr>
+<th>3</th>
+<td>2021-04-01</td>
+<td>37.62</td>
+<td>148.50</td>
+</tr>
+<tr>
+<th>4</th>
+<td>2021-05-01</td>
+<td>37.62</td>
+<td>186.12</td>
+</tr>
+<tr>
+<th>55</th>
+<td>2025-08-01</td>
+<td>37.62</td>
+<td>2165.12</td>
+</tr>
+<tr>
+<th>56</th>
+<td>2025-09-01</td>
+<td>37.62</td>
+<td>2202.74</td>
+</tr>
+<tr>
+<th>57</th>
+<td>2025-10-01</td>
+<td>37.62</td>
+<td>2240.36</td>
+</tr>
+<tr>
+<th>58</th>
+<td>2025-11-01</td>
+<td>49.62</td>
+<td>2289.98</td>
+</tr>
+<tr>
+<th>59</th>
+<td>2025-12-01</td>
+<td>38.62</td>
+<td>2328.60</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 </div>
